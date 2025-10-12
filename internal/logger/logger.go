@@ -1,35 +1,27 @@
 package logger
 
 import (
-	"log/slog"
-	"os"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
-// global logger
-var Log *slog.Logger
+var Log *zap.Logger = zap.NewNop()
 
-// parseLevel parses log level in string
-func parseLevel(s string) (slog.Level, error) {
-	var lvl slog.Level
-
-	if err := lvl.UnmarshalText([]byte(s)); err != nil {
-		return 0, err
-	}
-
-	return lvl.Level(), nil
-}
-
-// Initialize initiates global slog logger with log level
-// log level text: DEBUG, INFO, WARN and ERROR
+// Initialize initiates global logger
 func Initialize(level string) error {
-	// parse level
-	lvl, err := parseLevel(level)
+	lvl, err := zap.ParseAtomicLevel(level)
+	if err != nil {
+		return err
+	}
+	cfg := zap.NewProductionConfig()
+	cfg.Level = lvl
+	cfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+
+	zl, err := cfg.Build()
 	if err != nil {
 		return err
 	}
 
-	// create new logger
-	Log = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: lvl})).With("server", "gophkeeper")
-
+	Log = zl
 	return nil
 }

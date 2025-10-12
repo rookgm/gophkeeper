@@ -7,16 +7,20 @@ import (
 )
 
 const (
-	defaultServerAddr     = ":8080"
+	defaultServerAddr     = ":8443"
 	defaultServerLogLevel = "debug"
 )
 
 // ServerConfig contains server configurations
 type ServerConfig struct {
-	Address     string
+	// server address(host:port)
+	Address string
+	// data source name(postgres://user:pass@tcp(localhost:5555)/dbname)
 	DatabaseDSN string
-	LogLevel    string
-	ConfigPath  string
+	// logging level
+	LogLevel string
+	// configuration file path
+	ConfigPath string
 }
 
 // ServerOption is server config func option
