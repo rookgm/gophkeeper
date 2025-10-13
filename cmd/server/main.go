@@ -77,6 +77,8 @@ func main() {
 	router := chi.NewRouter()
 
 	router.Use(middleware.Logging(logger.Log))
+	router.Use(middleware.Gzip)
+
 	// register user
 	router.Post("/api/user/register", userHandler.RegisterUser())
 	// login user
@@ -85,6 +87,7 @@ func main() {
 	// routes that require authentication
 	router.Group(func(group chi.Router) {
 		group.Use(middleware.Auth(token))
+		group.Post("/api/user/test", userHandler.TestHandler())
 	})
 
 	// check existing server's key files

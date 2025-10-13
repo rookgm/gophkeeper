@@ -13,7 +13,7 @@ const (
 	authPayloadKey contextKey = "auth_payload"
 )
 
-// Auth  gets the token from the cookie and passes it to the context
+// Auth gets the token from the cookie and passes it to the context
 func Auth(ts service.TokenService) func(handler http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

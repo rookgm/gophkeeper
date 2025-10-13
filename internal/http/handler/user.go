@@ -88,3 +88,10 @@ func (uh *UserHandler) RegisterUser() http.HandlerFunc {
 		w.WriteHeader(http.StatusOK)
 	}
 }
+
+// TODO remove
+func (uh *UserHandler) TestHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}
+}

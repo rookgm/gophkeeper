@@ -13,13 +13,13 @@ const (
 
 // ServerConfig contains server configurations
 type ServerConfig struct {
-	// server address(host:port)
+	// Address is server address(host:port)
 	Address string
-	// data source name(postgres://user:pass@tcp(localhost:5555)/dbname)
+	// DatabaseDSN is data source name(postgres://user:pass@tcp(localhost:5555)/dbname)
 	DatabaseDSN string
-	// logging level
+	// LogLevel is logging level
 	LogLevel string
-	// configuration file path
+	// ConfigPath is configuration file path
 	ConfigPath string
 }
 
