@@ -3,8 +3,8 @@ package handler
 import (
 	"errors"
 	"github.com/golang/mock/gomock"
-	"github.com/rookgm/gophkeeper/internal/http/handler/mocks"
 	"github.com/rookgm/gophkeeper/internal/models"
+	"github.com/rookgm/gophkeeper/internal/server/http/handler/mocks"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"net/http"

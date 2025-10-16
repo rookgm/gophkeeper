@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"github.com/golang/mock/gomock"
-	"github.com/rookgm/gophkeeper/internal/http/handler/mocks"
+	"github.com/rookgm/gophkeeper/internal/server/http/handler/mocks"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"

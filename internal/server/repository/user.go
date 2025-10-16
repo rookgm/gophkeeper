@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/jackc/pgx/v5"
 	"github.com/rookgm/gophkeeper/internal/models"
-	"github.com/rookgm/gophkeeper/internal/repository/postgres"
+	"github.com/rookgm/gophkeeper/internal/server/repository/postgres"
 )
 
 const (

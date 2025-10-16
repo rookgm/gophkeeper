@@ -3,7 +3,7 @@ package middleware
 import (
 	"context"
 	"github.com/rookgm/gophkeeper/internal/models"
-	"github.com/rookgm/gophkeeper/internal/service"
+	"github.com/rookgm/gophkeeper/internal/server/service"
 	"net/http"
 )
 

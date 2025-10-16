@@ -1,5 +1,10 @@
 package models
 
+type Secret struct {
+	ID   uint64
+	UUID string
+}
+
 type BankCard struct {
 	CardNumber      string `json:"cardNumber"`      // CardNumber is full bank card number
 	ExpirationMonth string `json:"expirationMonth"` // ExpirationMonth is two-digit expiration month of the card.

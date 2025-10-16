@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	"errors"
-	"github.com/rookgm/gophkeeper/internal/auth"
 	"github.com/rookgm/gophkeeper/internal/models"
+	"github.com/rookgm/gophkeeper/internal/server/auth"
 	"golang.org/x/crypto/bcrypt"
 )
 
