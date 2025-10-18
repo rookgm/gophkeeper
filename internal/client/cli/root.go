@@ -1,7 +1,8 @@
-package main
+package cli
 
 import (
 	"fmt"
+	"github.com/rookgm/gophkeeper/internal/build"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -13,17 +14,15 @@ var rootCmd = &cobra.Command{
 	your secrets encrypted locally and remotely`,
 }
 
-func init() {
+func Execute(info *build.AppBuildInfo) {
 	rootCmd.AddCommand(
 		registerCmd,
 		loginCmd,
 		secretCmd,
 		syncCmd,
-		versionCmd,
+		versionCmd(info),
 	)
-}
 
-func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)

@@ -1,9 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"github.com/rookgm/gophkeeper/config"
-	"github.com/rookgm/gophkeeper/internal/logger"
-	"go.uber.org/zap"
+	"github.com/rookgm/gophkeeper/internal/build"
+	"github.com/rookgm/gophkeeper/internal/client/cli"
 )
 
 // application build info
@@ -24,12 +25,9 @@ func main() {
 		panic(err)
 	}
 
-	// initialize logger
-	if err := logger.Initialize(cfg.LogLevel); err != nil {
-		panic("Error initialize logger")
-	}
+	// TODO
+	fmt.Println(cfg)
 
-	logger.Log.Info("Starting client", zap.String("address", cfg.ServerAddress))
-
-	Execute()
+	info := build.NewBuildInfo(BuildVersion, BuildDate, BuildCommit)
+	cli.Execute(info)
 }
