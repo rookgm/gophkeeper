@@ -2,9 +2,18 @@ package main
 
 import (
 	"github.com/rookgm/gophkeeper/config"
-	"github.com/rookgm/gophkeeper/internal/client/cmd"
 	"github.com/rookgm/gophkeeper/internal/logger"
 	"go.uber.org/zap"
+)
+
+// application build info
+var (
+	// BuildVersion is application build version
+	BuildVersion = "N/A"
+	// BuildDate is application build date
+	BuildDate = "N/A"
+	// BuildCommit is application build commit
+	BuildCommit = "N/A"
 )
 
 func main() {
@@ -22,5 +31,5 @@ func main() {
 
 	logger.Log.Info("Starting client", zap.String("address", cfg.ServerAddress))
 
-	cmd.Execute()
+	Execute()
 }
