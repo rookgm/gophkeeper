@@ -1,30 +1,33 @@
 package cli
 
 import (
-	"fmt"
-	"github.com/rookgm/gophkeeper/internal/build"
+	"context"
 	"github.com/spf13/cobra"
-	"os"
 )
 
-var rootCmd = &cobra.Command{
-	Use:   "gophkeeper-client",
-	Short: "A gophkeeper small password manager CLI",
-	Long: `Manager passwords is a secure command-line password manager CLI that stores
-	your secrets encrypted locally and remotely`,
+type UserService interface {
+	RegisterUser(ctx context.Context, user, password string) error
+	LoginUser(ctx context.Context, user, password string) error
 }
 
-func Execute(info *build.AppBuildInfo) {
+type BuildInfoPrinter interface {
+	Print()
+}
+
+func NewRootCmd(userSvc UserService, buildInfo BuildInfoPrinter) *cobra.Command {
+	rootCmd := &cobra.Command{
+		Use:   "gophkeeper-client",
+		Short: "A gophkeeper small password manager CLI",
+		Long: `Manager passwords is a secure command-line password manager CLI that stores
+	your secrets encrypted locally and remotely`,
+	}
+
 	rootCmd.AddCommand(
-		registerCmd,
-		loginCmd,
+		newRegisterCmd(userSvc),
+		newLoginCmd(userSvc),
 		secretCmd,
 		syncCmd,
-		versionCmd(info),
+		newVersionCmd(buildInfo),
 	)
-
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	return rootCmd
 }

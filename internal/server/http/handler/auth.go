@@ -6,7 +6,6 @@ import (
 	"errors"
 	"github.com/rookgm/gophkeeper/internal/models"
 	"net/http"
-	"time"
 )
 
 // AuthService is interface for interfacing with user authentication
@@ -24,12 +23,6 @@ func NewAuthHandler(authSvc AuthService) *AuthHandler {
 	return &AuthHandler{authSvc: authSvc}
 }
 
-// loginRequest is user login data
-type loginRequest struct {
-	Login    string `json:"login"`
-	Password string `json:"password"`
-}
-
 // LoginUser perform user logging
 // 200 — пользователь успешно аутентифицирован;
 // 400 — неверный формат запроса;
@@ -37,7 +30,7 @@ type loginRequest struct {
 // 500 — внутренняя ошибка сервера.
 func (ah *AuthHandler) LoginUser() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var loginReq loginRequest
+		var loginReq models.LoginRequest
 
 		if err := json.NewDecoder(r.Body).Decode(&loginReq); err != nil {
 			http.Error(w, "bad request", http.StatusBadRequest)
@@ -55,14 +48,17 @@ func (ah *AuthHandler) LoginUser() http.HandlerFunc {
 			return
 		}
 
-		http.SetCookie(w, &http.Cookie{
-			Name:     "auth_token",
-			Value:    token,
-			Path:     "/",
-			Expires:  time.Now().Add(24 * time.Hour),
-			HttpOnly: true,
-		})
-
-		w.WriteHeader(http.StatusOK)
+		resp := models.LoginResponse{
+			Token: token,
+		}
+		// write login response with token
+		ah.writeJSON(w, resp, http.StatusOK)
 	}
+}
+
+// writeJSON writes response in JSON format
+func (ah *AuthHandler) writeJSON(w http.ResponseWriter, data interface{}, statusCode int) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	_ = json.NewEncoder(w).Encode(data)
 }

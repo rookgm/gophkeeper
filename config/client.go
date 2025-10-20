@@ -8,16 +8,16 @@ import (
 
 // client default values
 const (
-	defaultServerAddress = ":8443"
+	defaultServerAddress = "https://localhost:8443"
 	defaultLogLevel      = "debug"
-	defaultStoragePath   = "./gophkeeper/storage"
+	defaultConfigDir     = "./gophkeeper"
 )
 
 // ClientConfig contains client configuration information
 type ClientConfig struct {
 	ServerAddress string
 	LogLevel      string
-	StoragePath   string
+	ConfigDir     string
 }
 
 // singleton
@@ -33,7 +33,7 @@ func NewClientConfig() (*ClientConfig, error) {
 		// init flags
 		flag.StringVar(&cfg.ServerAddress, "a", defaultServerAddress, "gophkeeper server address")
 		flag.StringVar(&cfg.LogLevel, "l", defaultLogLevel, "gophkeeper client log level")
-		flag.StringVar(&cfg.StoragePath, "f", defaultStoragePath, "gophkeeper client storage path")
+		flag.StringVar(&cfg.ConfigDir, "f", defaultConfigDir, "gophkeeper configuration directory")
 
 		flag.Parse()
 
@@ -46,9 +46,9 @@ func NewClientConfig() (*ClientConfig, error) {
 		if logLevelEnv := os.Getenv("CLIENT_LOG_LEVEL"); logLevelEnv != "" {
 			cfg.LogLevel = logLevelEnv
 		}
-		// sets client storage path
-		if storagePathEnv := os.Getenv("CLIENT_STORAGE_PATH"); storagePathEnv != "" {
-			cfg.StoragePath = storagePathEnv
+		// sets client cnfig directory
+		if storagePathEnv := os.Getenv("CLIENT_CONFIG_DIR"); storagePathEnv != "" {
+			cfg.ConfigDir = storagePathEnv
 		}
 
 		singleton = &cfg

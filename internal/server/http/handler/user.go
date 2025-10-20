@@ -34,12 +34,6 @@ func NewUserHandler(us UserService, ts TokenService) *UserHandler {
 	}
 }
 
-// registerRequest is user registration data
-type registerRequest struct {
-	Login    string `json:"login"`
-	Password string `json:"password"`
-}
-
 // RegisterUser registers new user
 // 200 — пользователь успешно зарегистрирован и аутентифицирован;
 // 400 — неверный формат запроса;
@@ -47,7 +41,7 @@ type registerRequest struct {
 // 500 — внутренняя ошибка сервера.
 func (uh *UserHandler) RegisterUser() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var regReq registerRequest
+		var regReq models.RegisterRequest
 
 		if err := json.NewDecoder(r.Body).Decode(&regReq); err != nil {
 			http.Error(w, "bad request", http.StatusBadRequest)
@@ -63,7 +57,7 @@ func (uh *UserHandler) RegisterUser() http.HandlerFunc {
 		err := uh.userSvc.Register(r.Context(), &user)
 		if err != nil {
 			if errors.Is(err, models.ErrConflictData) {
-				http.Error(w, "bad request", http.StatusConflict)
+				http.Error(w, "user already exist", http.StatusConflict)
 				return
 			} else {
 				http.Error(w, "internal error", http.StatusInternalServerError)

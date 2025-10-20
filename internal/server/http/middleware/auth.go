@@ -5,6 +5,7 @@ import (
 	"github.com/rookgm/gophkeeper/internal/models"
 	"github.com/rookgm/gophkeeper/internal/server/service"
 	"net/http"
+	"strings"
 )
 
 type contextKey string
@@ -17,13 +18,19 @@ const (
 func Auth(ts service.TokenService) func(handler http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			cookie, err := r.Cookie("auth_token")
-			if err != nil {
-				http.Error(w, "can not get cookie", http.StatusUnauthorized)
+			authHeader := r.Header.Get("Authorization")
+			if authHeader == "" {
+				http.Error(w, "can not get Authorization header", http.StatusUnauthorized)
 				return
 			}
+			parts := strings.SplitN(authHeader, " ", 2)
+			if len(parts) != 2 || parts[0] != "Bearer" {
+				http.Error(w, "invalid token format", http.StatusUnauthorized)
+			}
 
-			payload, err := ts.VerifyToken(cookie.Value)
+			token := parts[1]
+
+			payload, err := ts.VerifyToken(token)
 			if err != nil {
 				http.Error(w, "unauthorized", http.StatusUnauthorized)
 				return
