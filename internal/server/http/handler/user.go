@@ -6,7 +6,6 @@ import (
 	"errors"
 	"github.com/rookgm/gophkeeper/internal/models"
 	"net/http"
-	"time"
 )
 
 // UserService is interface for interfacing with user-related logic
@@ -35,7 +34,7 @@ func NewUserHandler(us UserService, ts TokenService) *UserHandler {
 }
 
 // RegisterUser registers new user
-// 200 — пользователь успешно зарегистрирован и аутентифицирован;
+// 200 — пользователь успешно зарегистрирован;
 // 400 — неверный формат запроса;
 // 409 — логин уже занят;
 // 500 — внутренняя ошибка сервера.
@@ -64,21 +63,19 @@ func (uh *UserHandler) RegisterUser() http.HandlerFunc {
 				return
 			}
 		}
-
+		/* TODO send token
 		token, err := uh.tokenSvc.CreateToken(&user)
 		if err != nil {
 			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
 
-		http.SetCookie(w, &http.Cookie{
-			Name:     "auth_token",
-			Value:    token,
-			Path:     "/",
-			Expires:  time.Now().Add(24 * time.Hour),
-			HttpOnly: true,
-		})
-
+		resp := models.LoginResponse{
+			Token: token,
+		}
+		// write login response with token
+		writeJSON(w, resp, http.StatusOK)
+		*/
 		w.WriteHeader(http.StatusOK)
 	}
 }

@@ -1,60 +1,39 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
+	"github.com/rookgm/gophkeeper/internal/models"
 	"github.com/spf13/cobra"
+	"os"
 )
 
-var secretCmd = &cobra.Command{
-	Use:    "secret",
-	Short:  "Manage secrets",
-	PreRun: auth,
+type secretCmd struct {
+	secretSvc      SecretService
+	masterPassword string
 }
 
-var secretAddCmd = &cobra.Command{
-	Use:   "add",
-	Short: "Add a secret",
-}
+func newSecretCmd(secretSvc SecretService) *cobra.Command {
+	sec := &secretCmd{secretSvc: secretSvc}
+	cmd := &cobra.Command{
+		Use:   "secret",
+		Short: "Manage secrets",
+	}
+	// create secret adder command
+	secretAddCmd := &cobra.Command{Use: "add", Short: "Add a secret"}
+	// add commands: add, delete, get to main secret cmd
+	cmd.AddCommand(secretAddCmd)
+	cmd.AddCommand(&cobra.Command{Use: "get", Short: "Get a secret", Args: cobra.ExactArgs(1), PreRunE: sec.auth, RunE: sec.runSecretGetCmd})
+	cmd.AddCommand(&cobra.Command{Use: "delete", Short: "Delete a secret", Args: cobra.ExactArgs(1), PreRunE: sec.auth, RunE: sec.runSecretDeleteCmd})
 
-var addCredentialsCmd = &cobra.Command{
-	Use:   "credentials",
-	Short: "Add credentials",
-	RunE:  runAddCredentials,
-}
+	addCredentialsCmd := &cobra.Command{Use: "credentials", Short: "Add credentials", PreRunE: sec.auth, RunE: sec.runAddCredentials}
+	addTextCmd := &cobra.Command{Use: "text", Short: "Add text", PreRunE: sec.auth, RunE: sec.runAddTextCmd}
+	addBinaryCmd := &cobra.Command{Use: "binary", Short: "Add binary data", PreRunE: sec.auth, RunE: sec.runAddBinaryCmd}
+	addBankCardCmd := &cobra.Command{Use: "card", Short: "Add bank card", PreRunE: sec.auth, RunE: sec.runAddBankCardCmd}
 
-var addTextCmd = &cobra.Command{
-	Use:   "text",
-	Short: "Add text",
-	RunE:  runAddTextCmd,
-}
+	// add command to secret adder command
+	secretAddCmd.AddCommand(addCredentialsCmd, addTextCmd, addBinaryCmd, addBankCardCmd)
 
-var addBinaryCmd = &cobra.Command{
-	Use:   "binary",
-	Short: "Add binary data",
-	RunE:  runAddBinaryCmd,
-}
-
-var addBankCardCmd = &cobra.Command{
-	Use:   "card",
-	Short: "Add bank card",
-	RunE:  runAddBankCardCmd,
-}
-
-var secretGetCmd = &cobra.Command{
-	Use:   "get",
-	Short: "Get a secret",
-	Args:  cobra.ExactArgs(1),
-	RunE:  runSecretGetCmd,
-}
-
-var secretDeleteCmd = &cobra.Command{
-	Use:   "delete",
-	Short: "Delete a secret",
-	Args:  cobra.ExactArgs(1),
-	RunE:  runSecretDeleteCmd,
-}
-
-func init() {
 	// common flags
 	secretAddCmd.PersistentFlags().StringP("name", "n", "", "secret name")
 	secretAddCmd.PersistentFlags().StringP("note", "e", "", "secret note")
@@ -73,14 +52,17 @@ func init() {
 	addBankCardCmd.Flags().String("type", "", "type of credit card (e.g., Visa, Mastercard, American Express)")
 	addBankCardCmd.Flags().String("issue", "", "name of the bank that issued the bank card")
 
-	secretCmd.AddCommand(secretAddCmd, secretGetCmd, secretDeleteCmd)
-	secretAddCmd.AddCommand(addCredentialsCmd, addTextCmd, addBinaryCmd, addBankCardCmd)
-
+	return cmd
 }
 
-// TODO
-func auth(cmd *cobra.Command, args []string) {
+func (c *secretCmd) auth(cmd *cobra.Command, args []string) error {
+	master, err := readPassword("Enter master password: ")
+	if err != nil {
+		return fmt.Errorf("Error reading master password: %v\n", err)
+	}
+	c.masterPassword = master
 
+	return nil
 }
 
 // runAddCredentials adds credentials data
@@ -91,7 +73,7 @@ func auth(cmd *cobra.Command, args []string) {
 // -n "name"
 // -l "login"
 // -e "note"
-func runAddCredentials(cmd *cobra.Command, args []string) error {
+func (c *secretCmd) runAddCredentials(cmd *cobra.Command, args []string) error {
 	name, _ := cmd.Flags().GetString("name")
 	if name == "" {
 		fmt.Print("Name: ")
@@ -115,8 +97,20 @@ func runAddCredentials(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("Error reading password: %v\n", err)
 	}
-	// TODO
-	fmt.Println(pwd)
+
+	req := models.Credentials{
+		Name:     name,
+		Note:     note,
+		Login:    login,
+		Password: pwd,
+	}
+
+	resp, err := c.secretSvc.AddCredentials(cmd.Context(), req, c.masterPassword)
+	if err != nil {
+		return fmt.Errorf("Error adding credentials: %v\n", err)
+	}
+
+	fmt.Printf("Successfully added credentials, ID: %s\n", resp.ID)
 
 	return nil
 }
@@ -129,7 +123,7 @@ func runAddCredentials(cmd *cobra.Command, args []string) error {
 // -n "name"
 // -c "content"
 // -e "note"
-func runAddTextCmd(cmd *cobra.Command, args []string) error {
+func (c *secretCmd) runAddTextCmd(cmd *cobra.Command, args []string) error {
 	name, _ := cmd.Flags().GetString("name")
 	if name == "" {
 		fmt.Print("Name: ")
@@ -148,6 +142,19 @@ func runAddTextCmd(cmd *cobra.Command, args []string) error {
 		fmt.Scanln(&note)
 	}
 
+	req := models.TextData{
+		Name:    name,
+		Note:    note,
+		Content: content,
+	}
+
+	res, err := c.secretSvc.AddText(cmd.Context(), req, c.masterPassword)
+	if err != nil {
+		return fmt.Errorf("Error adding text: %v\n", err)
+	}
+
+	fmt.Printf("Successfully added text, ID: %s\n", res.ID)
+
 	return nil
 }
 
@@ -159,7 +166,7 @@ func runAddTextCmd(cmd *cobra.Command, args []string) error {
 // -n "name"
 // -p "file_name"
 // -e "note"
-func runAddBinaryCmd(cmd *cobra.Command, args []string) error {
+func (c *secretCmd) runAddBinaryCmd(cmd *cobra.Command, args []string) error {
 	name, _ := cmd.Flags().GetString("name")
 	if name == "" {
 		fmt.Print("Name: ")
@@ -178,7 +185,23 @@ func runAddBinaryCmd(cmd *cobra.Command, args []string) error {
 		fmt.Scanln(&note)
 	}
 
-	fmt.Println(name, fileName, note)
+	if _, err := os.Stat(fileName); errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf("File %s does not exist\n", fileName)
+	}
+
+	req := models.BinaryData{
+		Name:     name,
+		FileName: fileName,
+		Note:     note,
+		Data:     nil,
+	}
+
+	res, err := c.secretSvc.AddBinary(cmd.Context(), req, c.masterPassword)
+	if err != nil {
+		return fmt.Errorf("Error adding binary: %v\n", err)
+	}
+
+	fmt.Printf("Successfully added binary, ID: %s\n", res.ID)
 
 	return nil
 }
@@ -190,7 +213,19 @@ func runAddBinaryCmd(cmd *cobra.Command, args []string) error {
 // flags:
 // -n "name"
 // -e "note"
-func runAddBankCardCmd(cmd *cobra.Command, args []string) error {
+func (c *secretCmd) runAddBankCardCmd(cmd *cobra.Command, args []string) error {
+	name, _ := cmd.Flags().GetString("name")
+	if name == "" {
+		fmt.Print("Name: ")
+		fmt.Scanln(&name)
+	}
+
+	note, _ := cmd.Flags().GetString("note")
+	if note == "" {
+		fmt.Print("Note: ")
+		fmt.Scanln(&note)
+	}
+
 	number, _ := cmd.Flags().GetString("number")
 	if number == "" {
 		fmt.Print("Card number: ")
@@ -238,8 +273,26 @@ func runAddBankCardCmd(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("Error reading CVV: %v\n", err)
 	}
-	// TODO
-	fmt.Println("cvv:", cvv)
+
+	req := models.BankCard{
+		Name:            name,
+		Note:            note,
+		CardNumber:      number,
+		ExpirationMonth: expmonth,
+		ExpirationYear:  expyear,
+		CardHolderName:  holdername,
+		Cvv:             cvv,
+		BillingAddress:  address,
+		CardType:        cardType,
+		IssuingBank:     issue,
+	}
+
+	resp, err := c.secretSvc.AddBankCard(cmd.Context(), req, c.masterPassword)
+	if err != nil {
+		return fmt.Errorf("Error adding bank card: %v\n", err)
+	}
+
+	fmt.Printf("Successfully added bank card, ID: %s\n", resp.ID)
 
 	return nil
 }
@@ -247,7 +300,7 @@ func runAddBankCardCmd(cmd *cobra.Command, args []string) error {
 // runSecretGetCmd gets secret info
 //
 // command: secret get <secret_id>
-func runSecretGetCmd(cmd *cobra.Command, args []string) error {
+func (c *secretCmd) runSecretGetCmd(cmd *cobra.Command, args []string) error {
 	id := args[0]
 	fmt.Println(id)
 	return nil
@@ -256,7 +309,7 @@ func runSecretGetCmd(cmd *cobra.Command, args []string) error {
 // runSecretDeleteCmd removes secret
 //
 // command: secret delete <secret_id>
-func runSecretDeleteCmd(cmd *cobra.Command, args []string) error {
+func (c *secretCmd) runSecretDeleteCmd(cmd *cobra.Command, args []string) error {
 	id := args[0]
 	fmt.Println(id)
 

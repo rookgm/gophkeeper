@@ -6,13 +6,10 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"github.com/rookgm/gophkeeper/internal/models"
 	"io"
 	"net/http"
 	"time"
 )
-
-const tokenName = "auth_token"
 
 // Client is http client interacting with the server
 type Client struct {
@@ -39,30 +36,8 @@ func NewClient(baseURL string) *Client {
 	}
 }
 
-// Register registers a new user
-func (c *Client) Register(ctx context.Context, req models.RegisterRequest) error {
-	// POST /api/user/register
-	err := c.doRequest(ctx, "POST", "/api/user/register", req, nil)
-	if err != nil {
-		return fmt.Errorf("register request failed: %w", err)
-	}
-	return nil
-}
-
-// Login perform user logging
-func (c *Client) Login(ctx context.Context, req models.LoginRequest) (*models.LoginResponse, error) {
-	resp := &models.LoginResponse{}
-	// POST /api/user/login
-	err := c.doRequest(ctx, "POST", "/api/user/login", req, resp)
-	if err != nil {
-		return nil, fmt.Errorf("login request failed: %w", err)
-	}
-
-	return resp, nil
-}
-
 // doRequest performs an http request
-func (c *Client) doRequest(ctx context.Context, method string, path string, body interface{}, result interface{}) error {
+func (c *Client) doRequest(ctx context.Context, method string, path string, token *string, body interface{}, result interface{}) error {
 	var bodyReader io.Reader
 	if body != nil {
 		data, err := json.Marshal(body)
@@ -75,6 +50,10 @@ func (c *Client) doRequest(ctx context.Context, method string, path string, body
 	req, err := http.NewRequestWithContext(ctx, method, c.baseURL+path, bodyReader)
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
+	}
+
+	if token != nil {
+		req.Header.Set("Authorization", "Bearer "+*token)
 	}
 
 	req.Header.Set("Content-Type", "application/json")

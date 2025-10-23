@@ -52,12 +52,12 @@ func (ah *AuthHandler) LoginUser() http.HandlerFunc {
 			Token: token,
 		}
 		// write login response with token
-		ah.writeJSON(w, resp, http.StatusOK)
+		writeJSON(w, resp, http.StatusOK)
 	}
 }
 
 // writeJSON writes response in JSON format
-func (ah *AuthHandler) writeJSON(w http.ResponseWriter, data interface{}, statusCode int) {
+func writeJSON(w http.ResponseWriter, data interface{}, statusCode int) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 	_ = json.NewEncoder(w).Encode(data)

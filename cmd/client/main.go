@@ -6,6 +6,7 @@ import (
 	"github.com/rookgm/gophkeeper/internal/build"
 	"github.com/rookgm/gophkeeper/internal/client/api"
 	"github.com/rookgm/gophkeeper/internal/client/cli"
+	"github.com/rookgm/gophkeeper/internal/client/crypto"
 	"github.com/rookgm/gophkeeper/internal/client/service"
 	"log"
 	"os"
@@ -42,7 +43,6 @@ func createConfigDir(dir string) (string, error) {
 }
 
 func main() {
-
 	// load client config
 	cfg, err := config.NewClientConfig()
 	if err != nil {
@@ -57,11 +57,13 @@ func main() {
 	// application build info
 	buildInfo := build.NewBuildInfo(BuildVersion, BuildDate, BuildCommit)
 
-	token := service.NewToken(path.Join(cfgPath, tokenFileName))
+	encryptor := crypto.NewAESEncryptor()
+	tokener := service.NewToken(path.Join(cfgPath, tokenFileName))
 
 	apiClient := api.NewClient(cfg.ServerAddress)
-	userService := service.NewUserService(apiClient, token)
-	clientCli := cli.NewRootCmd(userService, buildInfo)
+	userService := service.NewUserService(apiClient, tokener)
+	secretService := service.NewSecretService(apiClient, encryptor, tokener)
+	clientCli := cli.NewRootCmd(userService, secretService, buildInfo)
 
 	if err := clientCli.Execute(); err != nil {
 		fmt.Printf("error running client cli %v\n", err)

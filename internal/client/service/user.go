@@ -6,7 +6,7 @@ import (
 	"github.com/rookgm/gophkeeper/internal/models"
 )
 
-type APIClient interface {
+type APIClientUser interface {
 	Register(ctx context.Context, req models.RegisterRequest) error
 	Login(ctx context.Context, req models.LoginRequest) (*models.LoginResponse, error)
 }
@@ -19,11 +19,11 @@ type Tokener interface {
 
 // UserService implements UserService interface
 type UserService struct {
-	apiClient APIClient
+	apiClient APIClientUser
 	tokener   Tokener
 }
 
-func NewUserService(apiClient APIClient, tokener Tokener) *UserService {
+func NewUserService(apiClient APIClientUser, tokener Tokener) *UserService {
 	return &UserService{apiClient: apiClient, tokener: tokener}
 }
 
