@@ -10,12 +10,10 @@ import (
 )
 
 type SecretService interface {
-	AddCredentials(ctx context.Context, req models.Credentials, masterPassword string) (*models.Credentials, error)
-	AddText(ctx context.Context, req models.TextData, masterPassword string) (*models.TextData, error)
-	AddBinary(ctx context.Context, req models.BinaryData, masterPassword string) (*models.BinaryData, error)
-	AddBankCard(ctx context.Context, req models.BankCard, masterPassword string) (*models.BankCard, error)
+	CreateSecret(ctx context.Context, req models.SecretRequest, masterPassword string) (*models.SecretResponse, error)
 	GetSecret(ctx context.Context, id uuid.UUID, masterPassword string) (*models.SecretResponse, error)
 	DeleteSecret(ctx context.Context, id uuid.UUID, masterPassword string) (*models.SecretResponse, error)
+	UpdateSecret(ctx context.Context, id uuid.UUID, req models.SecretRequest, masterPassword string) (*models.SecretResponse, error)
 }
 
 type secretCmd struct {

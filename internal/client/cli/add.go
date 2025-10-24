@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/rookgm/gophkeeper/internal/models"
@@ -48,9 +49,21 @@ func (c *secretCmd) runAddCredentials(cmd *cobra.Command, args []string) error {
 		Password: pwd,
 	}
 
-	resp, err := c.secretSvc.AddCredentials(cmd.Context(), req, c.masterPassword)
+	reqJSON, err := json.Marshal(req)
 	if err != nil {
-		return fmt.Errorf("Error adding credentials: %v\n", err)
+		return fmt.Errorf("Error marshalling binary data request: %v\n", err)
+	}
+
+	secReq := models.SecretRequest{
+		Name: req.Name,
+		Type: models.Card,
+		Note: req.Note,
+		Data: reqJSON,
+	}
+
+	resp, err := c.secretSvc.CreateSecret(cmd.Context(), secReq, c.masterPassword)
+	if err != nil {
+		return fmt.Errorf("Error creating secret: %v\n", err)
 	}
 
 	fmt.Printf("Successfully added credentials, ID: %s\n", resp.ID)
@@ -91,12 +104,24 @@ func (c *secretCmd) runAddTextCmd(cmd *cobra.Command, args []string) error {
 		Content: content,
 	}
 
-	res, err := c.secretSvc.AddText(cmd.Context(), req, c.masterPassword)
+	reqJSON, err := json.Marshal(req)
 	if err != nil {
-		return fmt.Errorf("Error adding text: %v\n", err)
+		return fmt.Errorf("Error marshalling binary data request: %v\n", err)
 	}
 
-	fmt.Printf("Successfully added text, ID: %s\n", res.ID)
+	secReq := models.SecretRequest{
+		Name: req.Name,
+		Type: models.Card,
+		Note: req.Note,
+		Data: reqJSON,
+	}
+
+	resp, err := c.secretSvc.CreateSecret(cmd.Context(), secReq, c.masterPassword)
+	if err != nil {
+		return fmt.Errorf("Error creating secret: %v\n", err)
+	}
+
+	fmt.Printf("Successfully added text, ID: %s\n", resp.ID)
 
 	return nil
 }
@@ -132,19 +157,36 @@ func (c *secretCmd) runAddBinaryCmd(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("File %s does not exist\n", fileName)
 	}
 
+	data, err := os.ReadFile(fileName)
+	if err != nil {
+		return fmt.Errorf("Error reading file %s: %v\n", fileName, err)
+	}
+
 	req := models.BinaryData{
 		Name:     name,
 		FileName: fileName,
 		Note:     note,
-		Data:     nil,
+		Data:     data,
 	}
 
-	res, err := c.secretSvc.AddBinary(cmd.Context(), req, c.masterPassword)
+	reqJSON, err := json.Marshal(req)
 	if err != nil {
-		return fmt.Errorf("Error adding binary: %v\n", err)
+		return fmt.Errorf("Error marshalling binary data request: %v\n", err)
 	}
 
-	fmt.Printf("Successfully added binary, ID: %s\n", res.ID)
+	secReq := models.SecretRequest{
+		Name: req.Name,
+		Type: models.Binary,
+		Note: req.Note,
+		Data: reqJSON,
+	}
+
+	resp, err := c.secretSvc.CreateSecret(cmd.Context(), secReq, c.masterPassword)
+	if err != nil {
+		return fmt.Errorf("Error creating secret: %v\n", err)
+	}
+
+	fmt.Printf("Successfully added binary data, ID: %s\n", resp.ID)
 
 	return nil
 }
@@ -230,9 +272,21 @@ func (c *secretCmd) runAddBankCardCmd(cmd *cobra.Command, args []string) error {
 		IssuingBank:     issue,
 	}
 
-	resp, err := c.secretSvc.AddBankCard(cmd.Context(), req, c.masterPassword)
+	reqJSON, err := json.Marshal(req)
 	if err != nil {
-		return fmt.Errorf("Error adding bank card: %v\n", err)
+		return fmt.Errorf("Error marshalling binary data request: %v\n", err)
+	}
+
+	secReq := models.SecretRequest{
+		Name: req.Name,
+		Type: models.Card,
+		Note: req.Note,
+		Data: reqJSON,
+	}
+
+	resp, err := c.secretSvc.CreateSecret(cmd.Context(), secReq, c.masterPassword)
+	if err != nil {
+		return fmt.Errorf("Error creating secret: %v\n", err)
 	}
 
 	fmt.Printf("Successfully added bank card, ID: %s\n", resp.ID)

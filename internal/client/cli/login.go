@@ -37,9 +37,9 @@ func (c *loginCmd) login(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("error reading password: %v\n", err)
 	}
-
+	// login user
 	if err := c.userSvc.LoginUser(cmd.Context(), user, pwd); err != nil {
-		return fmt.Errorf("error registering user: %v\n", err)
+		return fmt.Errorf("error user login: %v\n", err)
 	}
 
 	fmt.Println("login successfully")

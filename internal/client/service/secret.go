@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/rookgm/gophkeeper/internal/models"
@@ -32,22 +31,17 @@ func NewSecretService(apiClient APIClientSecreter, encryptor AESGSMEncryptor, to
 	return &SecretService{apiClient: apiClient, encryptor: encryptor, tokener: tokener}
 }
 
-// AddCredentials adds secret credential data
-func (s *SecretService) AddCredentials(ctx context.Context, req models.Credentials, masterPassword string) (*models.Credentials, error) {
-	// marshaling credentials
-	credData, err := json.Marshal(req)
-	if err != nil {
-		return nil, fmt.Errorf("Error marshalling credentials: %v\n", err)
-	}
+// CreateSecret creates a new secret
+func (s *SecretService) CreateSecret(ctx context.Context, req models.SecretRequest, masterPassword string) (*models.SecretResponse, error) {
 	// encrypt data with master password
-	credEnc, err := s.encryptor.EncryptPwd(credData, masterPassword)
+	credEnc, err := s.encryptor.EncryptPwd(req.Data, masterPassword)
 	if err != nil {
 		return nil, fmt.Errorf("Error encrypting credentials: %v\n", err)
 	}
 	// forming secret request
 	secReq := models.SecretRequest{
 		Name: req.Name,
-		Type: models.Credential,
+		Type: req.Type,
 		Note: req.Note,
 		Data: credEnc,
 	}
@@ -57,124 +51,7 @@ func (s *SecretService) AddCredentials(ctx context.Context, req models.Credentia
 		return nil, fmt.Errorf("Error loading token: %v\n", err)
 	}
 	// sending a request to create a secret
-	respSec, err := s.apiClient.CreateSecret(ctx, secReq, token)
-	if err != nil {
-		return nil, fmt.Errorf("Error creating secret: %v\n", err)
-	}
-
-	return &models.Credentials{
-		ID:   respSec.ID,
-		Name: respSec.Name,
-		Note: respSec.Note,
-	}, nil
-}
-
-// AddText adds secret text data
-func (s *SecretService) AddText(ctx context.Context, req models.TextData, masterPassword string) (*models.TextData, error) {
-	// marshaling text data
-	data, err := json.Marshal(req)
-	if err != nil {
-		return nil, fmt.Errorf("Error marshalling text data: %v\n", err)
-	}
-	// encrypt text data
-	textEnc, err := s.encryptor.EncryptPwd(data, masterPassword)
-	if err != nil {
-		return nil, fmt.Errorf("Error encrypting text data: %v\n", err)
-	}
-	// forming secret request
-	secReq := models.SecretRequest{
-		Name: req.Name,
-		Type: models.Text,
-		Note: req.Note,
-		Data: textEnc,
-	}
-	// load token
-	token, err := s.tokener.Load()
-	if err != nil {
-		return nil, fmt.Errorf("Error loading token: %v\n", err)
-	}
-	// sending a request to create a secret
-	respSec, err := s.apiClient.CreateSecret(ctx, secReq, token)
-	if err != nil {
-		return nil, fmt.Errorf("Error creating secret: %v\n", err)
-	}
-	return &models.TextData{
-		ID:   respSec.ID,
-		Name: respSec.Name,
-		Note: respSec.Note,
-	}, nil
-}
-
-// AddBinary adds secret binary data
-func (s *SecretService) AddBinary(ctx context.Context, req models.BinaryData, masterPassword string) (*models.BinaryData, error) {
-	// marshaling binary data
-	data, err := json.Marshal(req)
-	if err != nil {
-		return nil, fmt.Errorf("Error marshalling binary data: %v\n", err)
-	}
-	// encrypt binary data
-	binEnc, err := s.encryptor.EncryptPwd(data, masterPassword)
-	if err != nil {
-		return nil, fmt.Errorf("Error encrypting text data: %v\n", err)
-	}
-	// forming secret request
-	secReq := models.SecretRequest{
-		Name: req.Name,
-		Type: models.Credential,
-		Note: req.Note,
-		Data: binEnc,
-	}
-	// load token
-	token, err := s.tokener.Load()
-	if err != nil {
-		return nil, fmt.Errorf("Error loading token: %v\n", err)
-	}
-	// sending a request to create a secret
-	respSec, err := s.apiClient.CreateSecret(ctx, secReq, token)
-	if err != nil {
-		return nil, fmt.Errorf("Error creating secret: %v\n", err)
-	}
-	return &models.BinaryData{
-		ID:   respSec.ID,
-		Name: respSec.Name,
-		Note: respSec.Note,
-	}, nil
-}
-
-// AddBankCard adds secret bank data
-func (s *SecretService) AddBankCard(ctx context.Context, req models.BankCard, masterPassword string) (*models.BankCard, error) {
-	// marshaling bank card
-	data, err := json.Marshal(req)
-	if err != nil {
-		return nil, fmt.Errorf("Error marshalling bank card: %v\n", err)
-	}
-	// encrypt bank card
-	cardEnc, err := s.encryptor.EncryptPwd(data, masterPassword)
-	if err != nil {
-		return nil, fmt.Errorf("Error encrypting text data: %v\n", err)
-	}
-	// forming secret request
-	secReq := models.SecretRequest{
-		Name: req.Name,
-		Type: models.Credential,
-		Note: req.Note,
-		Data: cardEnc,
-	}
-	// load token
-	token, err := s.tokener.Load()
-	if err != nil {
-		return nil, fmt.Errorf("Error loading token: %v\n", err)
-	}
-	// sending a request to create a secret
-	respSec, err := s.apiClient.CreateSecret(ctx, secReq, token)
-	if err != nil {
-		return nil, fmt.Errorf("Error creating secret: %v\n", err)
-	}
-	return &models.BankCard{
-		ID:   respSec.ID,
-		Name: respSec.Name,
-		Note: respSec.Note,
-	}, nil
+	return s.apiClient.CreateSecret(ctx, secReq, token)
 }
 
 // GetSecret gets secret data

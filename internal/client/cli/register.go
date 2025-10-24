@@ -50,7 +50,7 @@ func (c *regCmd) register(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("error registering user: %v\n", err)
 	}
 
-	fmt.Printf("user: %s registered successfully\n", user)
+	fmt.Printf("user %s registered successfully\n", user)
 
 	return nil
 }
