@@ -4,6 +4,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type BuildInfoPrinter interface {
+	Print()
+}
+
 func newVersionCmd(info BuildInfoPrinter) *cobra.Command {
 	return &cobra.Command{
 		Use:   "version",

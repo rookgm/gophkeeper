@@ -1,11 +1,17 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 	"os"
 )
+
+type UserService interface {
+	RegisterUser(ctx context.Context, user, password string) error
+	LoginUser(ctx context.Context, user, password string) error
+}
 
 type regCmd struct {
 	userSvc UserService
