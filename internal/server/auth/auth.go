@@ -69,15 +69,17 @@ func (at *AuthToken) VerifyToken(tokenString string) (*models.TokenPayload, erro
 		return nil, ErrTokenPayload
 	}
 
-	// get userid in float value
-	userIDFloat, ok := claims["userid"].(float64)
+	// get userid string
+	userIDStr, ok := claims["userid"].(string)
 	if !ok {
 		return nil, ErrTokenPayload
 	}
 
-	// convert userid to int
-	userID := uint64(userIDFloat)
-
+	// parse user id string
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		return nil, ErrTokenPayload
+	}
 	return &models.TokenPayload{
 		ID:     id,
 		UserID: userID,

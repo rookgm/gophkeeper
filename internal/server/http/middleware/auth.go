@@ -2,6 +2,8 @@ package middleware
 
 import (
 	"context"
+	"errors"
+	"github.com/google/uuid"
 	"github.com/rookgm/gophkeeper/internal/models"
 	"github.com/rookgm/gophkeeper/internal/server/service"
 	"net/http"
@@ -47,4 +49,13 @@ func Auth(ts service.TokenService) func(handler http.Handler) http.Handler {
 func getAuthPayload(ctx context.Context, key contextKey) (*models.TokenPayload, bool) {
 	payload, ok := ctx.Value(key).(*models.TokenPayload)
 	return payload, ok
+}
+
+// GetUserID extracts user ID from context
+func GetUserID(ctx context.Context) (uuid.UUID, error) {
+	authPayload, ok := getAuthPayload(ctx, authPayloadKey)
+	if !ok || authPayload == nil {
+		return uuid.Nil, errors.New("invalid auth payload")
+	}
+	return authPayload.UserID, nil
 }
