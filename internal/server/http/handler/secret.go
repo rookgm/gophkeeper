@@ -158,7 +158,7 @@ func (h *SecretHandler) GetUserSecret(w http.ResponseWriter, r *http.Request) {
 // DELETE /api/user/secrets/{id}
 //
 // code status
-// 201 - secret is deleted successfully;
+// 200 - secret is deleted successfully;
 // 400 - bad request;
 // 401 - user is not authorized;
 // 404 - secret not found;
@@ -200,7 +200,7 @@ func (h *SecretHandler) DeleteUserSecret(w http.ResponseWriter, r *http.Request)
 // PUT /api/user/secrets/{id}
 //
 // code status
-// 201 - secret is created successfully;
+// 200 - secret is updated successfully;
 // 400 - bad request;
 // 401 - user is not authorized;
 // 404 - secret not found;
