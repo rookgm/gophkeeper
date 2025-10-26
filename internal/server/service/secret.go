@@ -7,11 +7,12 @@ import (
 	"time"
 )
 
+// SecretRepository is interface for interacting with secret-related data
 type SecretRepository interface {
 	CreateSecret(ctx context.Context, sec *models.Secret) (*models.Secret, error)
 	GetSecretByID(ctx context.Context, secretID, userID uuid.UUID) (*models.Secret, error)
-	DeleteSecretByID(ctx context.Context, secretID, userID uuid.UUID) error
 	UpdateSecretByID(ctx context.Context, secretID uuid.UUID, sec *models.Secret) error
+	DeleteSecretByID(ctx context.Context, secretID, userID uuid.UUID) error
 }
 
 // SecretService implements SecretService interface

@@ -11,11 +11,12 @@ import (
 	"net/http"
 )
 
+// SecretService is interface for interacting with secret service
 type SecretService interface {
 	CreateSecret(ctx context.Context, sec *models.Secret) (*models.Secret, error)
 	GetSecret(ctx context.Context, secretID, userID uuid.UUID) (*models.Secret, error)
-	DeleteSecret(ctx context.Context, secretID, userID uuid.UUID) error
 	UpdateSecret(ctx context.Context, secretID uuid.UUID, sec *models.Secret) error
+	DeleteSecret(ctx context.Context, secretID, userID uuid.UUID) error
 }
 
 // SecretHandler represents HTTP handler for secret-related requests
@@ -29,6 +30,10 @@ func NewSecretHandler(svc SecretService) *SecretHandler {
 }
 
 // CreateUserSecret creates new user secret
+//
+// POST /api/user/secrets
+//
+// code status
 // 201 - secret is created successfully;
 // 400 - bad request;
 // 401 - user is not authorized;
@@ -88,6 +93,16 @@ func (h *SecretHandler) CreateUserSecret(w http.ResponseWriter, r *http.Request)
 }
 
 // GetUserSecret gets user secret
+//
+// GET /api/user/secrets/{id}
+//
+// code status
+// 200 - secret is received successfully;
+// 400 - bad request;
+// 401 - user is not authorized;
+// 404 - secret not found;
+// 405 - method not allowed;
+// 500 - internal server error.
 func (h *SecretHandler) GetUserSecret(w http.ResponseWriter, r *http.Request) {
 	// only GET method
 	if r.Method != http.MethodGet {
@@ -112,7 +127,7 @@ func (h *SecretHandler) GetUserSecret(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, models.ErrDataNotFound):
-			http.Error(w, "data not found", http.StatusNotFound)
+			http.Error(w, "secret not found", http.StatusNotFound)
 		default:
 			http.Error(w, "internal error", http.StatusInternalServerError)
 		}
@@ -139,6 +154,16 @@ func (h *SecretHandler) GetUserSecret(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteUserSecret deletes user secret
+//
+// DELETE /api/user/secrets/{id}
+//
+// code status
+// 201 - secret is deleted successfully;
+// 400 - bad request;
+// 401 - user is not authorized;
+// 404 - secret not found;
+// 405 - method not allowed;
+// 500 - internal server error.
 func (h *SecretHandler) DeleteUserSecret(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -161,7 +186,7 @@ func (h *SecretHandler) DeleteUserSecret(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		switch {
 		case errors.Is(err, models.ErrDataNotFound):
-			http.Error(w, "data not found", http.StatusNotFound)
+			http.Error(w, "secret not found", http.StatusNotFound)
 		default:
 			http.Error(w, "internal error", http.StatusInternalServerError)
 		}
@@ -170,7 +195,17 @@ func (h *SecretHandler) DeleteUserSecret(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusOK)
 }
 
-// UpdateUserSecret update secret
+// UpdateUserSecret updates secret
+//
+// PUT /api/user/secrets/{id}
+//
+// code status
+// 201 - secret is created successfully;
+// 400 - bad request;
+// 401 - user is not authorized;
+// 404 - secret not found;
+// 405 - method not allowed;
+// 500 - internal server error.
 func (h *SecretHandler) UpdateUserSecret(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPut {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -210,7 +245,7 @@ func (h *SecretHandler) UpdateUserSecret(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		switch {
 		case errors.Is(err, models.ErrDataNotFound):
-			http.Error(w, "data not found", http.StatusNotFound)
+			http.Error(w, "secret not found", http.StatusNotFound)
 		default:
 			http.Error(w, "internal error", http.StatusInternalServerError)
 		}

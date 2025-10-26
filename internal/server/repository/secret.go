@@ -9,7 +9,6 @@ import (
 	"github.com/rookgm/gophkeeper/internal/server/repository/postgres"
 )
 
-// id | user_id | name | type | note | data | deleted | created_at | updated_at
 const (
 	insertSecretQuery = `
 							INSERT INTO secrets (user_id, name, type, note, data) 
