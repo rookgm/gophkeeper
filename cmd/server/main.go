@@ -14,6 +14,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/rookgm/gophkeeper/config"
@@ -27,6 +28,8 @@ const (
 	serverCertFileName = "cert/server.crt"
 	serverKeyFileName  = "cert/server.key"
 )
+
+const shutdownTimeout = 5 * time.Second
 
 func main() {
 	// initialize config
@@ -99,6 +102,12 @@ func main() {
 		group.Delete("/api/user/secrets/{id}", secretHandler.DeleteUserSecret)
 	})
 
+	// set server parameters
+	srv := http.Server{
+		Addr:    cfg.Address,
+		Handler: router,
+	}
+
 	// check existing server's key files
 	if _, err := os.Stat(serverCertFileName); errors.Is(err, os.ErrNotExist) {
 		logger.Log.Fatal("server cert file is not exist", zap.Error(err))
@@ -119,5 +128,22 @@ func main() {
 
 	<-ctx.Done()
 
-	// TODO add graceful shutdown
+	logger.Log.Info("Shutting down server...")
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+	defer cancel()
+
+	<-shutdownCtx.Done()
+
+	// shutdown server
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		logger.Log.Error("Error shutdown server", zap.Error(err))
+	}
+
+	// close db
+	if db != nil {
+		db.Close()
+	}
+
+	logger.Log.Info("server is finished")
 }
