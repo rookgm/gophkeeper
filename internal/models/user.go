@@ -7,7 +7,7 @@ import (
 
 // User is user entity
 type User struct {
-	ID        uint64
+	ID        uuid.UUID
 	Login     string
 	Password  string
 	CreatedAt time.Time
@@ -33,5 +33,5 @@ type LoginResponse struct {
 // TokenPayload is payload contains user id's
 type TokenPayload struct {
 	ID     uuid.UUID
-	UserID uint64
+	UserID uuid.UUID
 }

@@ -33,7 +33,7 @@ func (st SecretType) String() string {
 // Secret is secret entity
 type Secret struct {
 	ID        uuid.UUID
-	UserID    uint64
+	UserID    uuid.UUID
 	Name      string
 	Type      SecretType
 	Note      string

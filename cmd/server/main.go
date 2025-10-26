@@ -73,9 +73,15 @@ func main() {
 	authService := service.NewAuthService(userRepo, token)
 	authHandler := handler.NewAuthHandler(authService)
 
+	// secret
+	secretRepo := repository.NewSecretRepository(db)
+	secretService := service.NewSecretService(secretRepo)
+	secretHandler := handler.NewSecretHandler(secretService)
+
 	// routes
 	router := chi.NewRouter()
 
+	// middleware
 	router.Use(middleware.Logging(logger.Log))
 	router.Use(middleware.Gzip)
 
@@ -87,7 +93,10 @@ func main() {
 	// routes that require authentication
 	router.Group(func(group chi.Router) {
 		group.Use(middleware.Auth(token))
-		group.Post("/api/user/test", userHandler.TestHandler())
+		group.Post("/api/user/secrets", secretHandler.CreateUserSecret)
+		group.Get("/api/user/secrets/{id}", secretHandler.GetUserSecret)
+		group.Put("/api/user/secrets/{id}", secretHandler.UpdateUserSecret)
+		group.Delete("/api/user/secrets/{id}", secretHandler.DeleteUserSecret)
 	})
 
 	// check existing server's key files

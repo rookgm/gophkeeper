@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/google/uuid"
 	"github.com/rookgm/gophkeeper/internal/models"
 	"net/http"
 )
@@ -49,6 +50,7 @@ func (uh *UserHandler) RegisterUser() http.HandlerFunc {
 		defer r.Body.Close()
 
 		user := models.User{
+			ID:       uuid.New(),
 			Login:    regReq.Login,
 			Password: regReq.Password,
 		}
@@ -76,13 +78,6 @@ func (uh *UserHandler) RegisterUser() http.HandlerFunc {
 		// write login response with token
 		writeJSON(w, resp, http.StatusOK)
 		*/
-		w.WriteHeader(http.StatusOK)
-	}
-}
-
-// TODO remove
-func (uh *UserHandler) TestHandler() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}
 }

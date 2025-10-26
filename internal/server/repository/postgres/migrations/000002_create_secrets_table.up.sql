@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS "secrets" (
     "type" integer NOT NULL,
     "note" varchar DEFAULT '',
     "data" bytea NOT NULL,
+    "deleted" boolean NOT NULL DEFAULT FALSE,
     "created_at" timestamptz NOT NULL DEFAULT (now()),
     "updated_at" timestamptz NOT NULL DEFAULT (now())
 );
