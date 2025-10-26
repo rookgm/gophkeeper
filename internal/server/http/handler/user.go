@@ -65,19 +65,7 @@ func (uh *UserHandler) RegisterUser() http.HandlerFunc {
 				return
 			}
 		}
-		/* TODO send token
-		token, err := uh.tokenSvc.CreateToken(&user)
-		if err != nil {
-			http.Error(w, "internal error", http.StatusInternalServerError)
-			return
-		}
 
-		resp := models.LoginResponse{
-			Token: token,
-		}
-		// write login response with token
-		writeJSON(w, resp, http.StatusOK)
-		*/
 		w.WriteHeader(http.StatusOK)
 	}
 }
