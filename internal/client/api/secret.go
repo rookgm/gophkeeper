@@ -30,25 +30,24 @@ func (c *Client) GetSecret(ctx context.Context, id uuid.UUID, token string) (*mo
 }
 
 // DeleteSecret performs delete secret request
-func (c *Client) DeleteSecret(ctx context.Context, id uuid.UUID, token string) (*models.SecretResponse, error) {
+func (c *Client) DeleteSecret(ctx context.Context, id uuid.UUID, token string) error {
 	// DELETE /api/user/secrets/{id}
-	resp := &models.SecretResponse{}
 	err := c.doRequest(ctx, "DELETE", "/api/user/secrets/"+id.String(), &token, nil, nil)
 	if err != nil {
-		return nil, fmt.Errorf("Delete secret failed: %w\n", err)
+		fmt.Errorf("Delete secret failed: %w\n", err)
 	}
-	return resp, nil
+	return nil
 }
 
 // UpdateSecret performs update secret request
-func (c *Client) UpdateSecret(ctx context.Context, id uuid.UUID, req models.SecretRequest, token string) (*models.SecretResponse, error) {
+func (c *Client) UpdateSecret(ctx context.Context, id uuid.UUID, req models.SecretRequest, token string) error {
 	// PUT /api/user/secrets/{id}
 	resp := &models.SecretResponse{}
 	err := c.doRequest(ctx, "PUT", "/api/user/secrets/"+id.String(), &token, req, resp)
 	if err != nil {
-		return nil, fmt.Errorf("Update secret failed: %w\n", err)
+		return fmt.Errorf("Update secret failed: %w\n", err)
 	}
-	return resp, nil
+	return nil
 }
 
 // Sync performs syncing data

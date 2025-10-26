@@ -54,17 +54,23 @@ func main() {
 		log.Fatalf("error creating config dir: %v", err)
 	}
 
+	// dependency injection
 	// application build info
 	buildInfo := build.NewBuildInfo(BuildVersion, BuildDate, BuildCommit)
-
+	// create AES encryptor
 	encryptor := crypto.NewAESEncryptor()
-	tokener := service.NewToken(path.Join(cfgPath, tokenFileName))
-
+	// create client based on http
 	apiClient := api.NewClient(cfg.ServerAddress)
+	// create token service
+	tokener := service.NewTokenService(path.Join(cfgPath, tokenFileName))
+	// create user service
 	userService := service.NewUserService(apiClient, tokener)
+	// create secret service
 	secretService := service.NewSecretService(apiClient, encryptor, tokener)
+	// create client CLI
 	clientCli := cli.NewRootCmd(userService, secretService, buildInfo)
 
+	// run CLI
 	if err := clientCli.Execute(); err != nil {
 		fmt.Printf("error running client cli %v\n", err)
 		os.Exit(1)

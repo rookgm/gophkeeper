@@ -9,8 +9,8 @@ type TokenService struct {
 	name string
 }
 
-// NewToken creates a new token
-func NewToken(name string) *TokenService {
+// NewTokenService creates a new token
+func NewTokenService(name string) *TokenService {
 	return &TokenService{name: name}
 }
 

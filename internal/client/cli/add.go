@@ -4,10 +4,33 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/rookgm/gophkeeper/internal/models"
 	"github.com/spf13/cobra"
 	"os"
 )
+
+// TODO remove
+func (c *secretCmd) Test(cmd *cobra.Command, args []string) error {
+	fmt.Println("This is test, remove it")
+	//secReq := models.SecretRequest{
+	//	Name: "test_secret",
+	//	Type: models.Text,
+	//	Note: "test",
+	//	Data: []byte("this is test data"),
+	//}
+	//_, err := c.secretSvc.CreateSecret(cmd.Context(), secReq, "123")
+
+	id, _ := uuid.Parse("db08060a-d45a-4146-898d-be24bb4dddad")
+	sec, err := c.secretSvc.GetSecret(cmd.Context(), id, "123")
+	if err != nil {
+		return fmt.Errorf("Error getting secret: %v\n", err)
+	}
+
+	fmt.Println(string(sec.Data))
+
+	return err
+}
 
 // runAddCredentials adds credentials data
 //
@@ -56,7 +79,7 @@ func (c *secretCmd) runAddCredentials(cmd *cobra.Command, args []string) error {
 
 	secReq := models.SecretRequest{
 		Name: req.Name,
-		Type: models.Card,
+		Type: models.Credential,
 		Note: req.Note,
 		Data: reqJSON,
 	}
@@ -111,7 +134,7 @@ func (c *secretCmd) runAddTextCmd(cmd *cobra.Command, args []string) error {
 
 	secReq := models.SecretRequest{
 		Name: req.Name,
-		Type: models.Card,
+		Type: models.Text,
 		Note: req.Note,
 		Data: reqJSON,
 	}
