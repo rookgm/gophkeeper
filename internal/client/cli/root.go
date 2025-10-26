@@ -16,7 +16,6 @@ func NewRootCmd(userSvc UserService, secretSvc SecretService, buildInfo BuildInf
 		newRegisterCmd(userSvc),
 		newLoginCmd(userSvc),
 		newSecretCmd(secretSvc),
-		syncCmd,
 		newVersionCmd(buildInfo),
 	)
 	return rootCmd

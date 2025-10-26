@@ -43,12 +43,8 @@ func newSecretCmd(secretSvc SecretService) *cobra.Command {
 	addBinaryCmd := &cobra.Command{Use: "binary", Short: "Add binary data", PreRunE: sec.auth, RunE: sec.runAddBinaryCmd}
 	addBankCardCmd := &cobra.Command{Use: "card", Short: "Add bank card", PreRunE: sec.auth, RunE: sec.runAddBankCardCmd}
 
-	// TODO remove
-	addTestCmd := &cobra.Command{Use: "test", Short: "This test, remove", RunE: sec.Test}
-
-	// TODO remove addTestCmd
 	// add command to secret adder command
-	secretAddCmd.AddCommand(addCredentialsCmd, addTextCmd, addBinaryCmd, addBankCardCmd, addTestCmd)
+	secretAddCmd.AddCommand(addCredentialsCmd, addTextCmd, addBinaryCmd, addBankCardCmd)
 
 	// common flags
 	secretAddCmd.PersistentFlags().StringP("name", "n", "", "secret name")
