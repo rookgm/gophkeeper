@@ -10,10 +10,10 @@ import (
 	"strings"
 )
 
-type contextKey string
+type ContextKey string
 
 const (
-	authPayloadKey contextKey = "auth_payload"
+	AuthPayloadKey ContextKey = "auth_payload"
 )
 
 // Auth gets the token from the cookie and passes it to the context
@@ -38,7 +38,7 @@ func Auth(ts service.TokenService) func(handler http.Handler) http.Handler {
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), authPayloadKey, payload)
+			ctx := context.WithValue(r.Context(), AuthPayloadKey, payload)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
@@ -46,14 +46,14 @@ func Auth(ts service.TokenService) func(handler http.Handler) http.Handler {
 }
 
 // getAuthPayload extracts authorization token payload from context
-func getAuthPayload(ctx context.Context, key contextKey) (*models.TokenPayload, bool) {
+func getAuthPayload(ctx context.Context, key ContextKey) (*models.TokenPayload, bool) {
 	payload, ok := ctx.Value(key).(*models.TokenPayload)
 	return payload, ok
 }
 
 // GetUserID extracts user ID from context
 func GetUserID(ctx context.Context) (uuid.UUID, error) {
-	authPayload, ok := getAuthPayload(ctx, authPayloadKey)
+	authPayload, ok := getAuthPayload(ctx, AuthPayloadKey)
 	if !ok || authPayload == nil {
 		return uuid.Nil, errors.New("invalid auth payload")
 	}
