@@ -137,8 +137,6 @@ func main() {
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
 
-	<-shutdownCtx.Done()
-
 	// shutdown server
 	if err := srv.Shutdown(shutdownCtx); err != nil {
 		logger.Log.Error("Error shutdown server", zap.Error(err))
