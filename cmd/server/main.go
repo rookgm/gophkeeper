@@ -22,8 +22,6 @@ import (
 	"go.uber.org/zap"
 )
 
-const authTokenKey = "f53ac685bbceebd75043e6be2e06ee07"
-
 const (
 	serverCertFileName = "cert/server.crt"
 	serverKeyFileName  = "cert/server.key"
@@ -47,6 +45,17 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
+	// check auth token key
+	if cfg.AuthTokenKey == "" {
+		logger.Log.Fatal("Error token key is empty", zap.Error(err))
+	}
+
+	// decode authentification token in hex string
+	tokenKey, err := hex.DecodeString(cfg.AuthTokenKey)
+	if err != nil {
+		logger.Log.Fatal("Error extracting token key", zap.Error(err))
+	}
+
 	// initialize database
 	db, err := postgres.New(ctx, cfg.DatabaseDSN)
 	if err != nil {
@@ -59,14 +68,9 @@ func main() {
 		logger.Log.Fatal("Error migrating database", zap.Error(err))
 	}
 
-	// decode authentification token key
-	tokenKey, err := hex.DecodeString(authTokenKey)
-	if err != nil {
-		logger.Log.Fatal("Error extracting token key", zap.Error(err))
-	}
-	token := auth.NewAuthToken(tokenKey)
-
 	// dependency injection
+	// token
+	token := auth.NewAuthToken(tokenKey)
 	// user
 	userRepo := repository.NewUserRepository(db)
 	userService := service.NewUserService(userRepo)

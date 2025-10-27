@@ -21,6 +21,8 @@ type ServerConfig struct {
 	LogLevel string
 	// ConfigPath is configuration file path
 	ConfigPath string
+	// auth token key in hex
+	AuthTokenKey string
 }
 
 // ServerOption is server config func option
@@ -49,6 +51,15 @@ func WithDatabaseDSN(dsn string) ServerOption {
 	return func(c *ServerConfig) {
 		if dsn != "" {
 			c.DatabaseDSN = dsn
+		}
+	}
+}
+
+// WithAuthTokenKey sets server auth token key
+func WithAuthTokenKey(key string) ServerOption {
+	return func(c *ServerConfig) {
+		if key != "" {
+			c.AuthTokenKey = key
 		}
 	}
 }
@@ -96,6 +107,10 @@ func FromEnv() ServerOption {
 		// sets logging level
 		if logLevelEnv := os.Getenv("SERVER_LOG_LEVEL"); logLevelEnv != "" {
 			WithLogLevel(logLevelEnv)(c)
+		}
+		// sets auth token key
+		if authTokenKeyEnv := os.Getenv("SERVER_AUTH_TOKEN_KEY"); authTokenKeyEnv != "" {
+			WithAuthTokenKey(authTokenKeyEnv)(c)
 		}
 	}
 }
